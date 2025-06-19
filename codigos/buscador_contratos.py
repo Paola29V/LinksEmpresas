@@ -112,21 +112,21 @@ class BuscadorContratos:
         try:
             # Crear DataFrame con los resultados
             df = pd.DataFrame(self.resultados)
-            
-            # Si no se especifica archivo de salida, crear uno nuevo
+        
+        # Si no se especifica archivo de salida, crear uno nuevo con fecha y hora
             if archivo_salida is None:
-                fecha_actual = datetime.now().strftime('%Y%m%d')
-                archivo_salida = f'resultados_combinados_{fecha_actual}.xlsx'
-            
-            # Guardar resultados
+                fecha_hora_actual = datetime.now().strftime('%Y%m%d_%H%M%S')
+                archivo_salida = f'resultados_combinados_{fecha_hora_actual}.xlsx'
+        
+        # Guardar resultados
             if os.path.exists(archivo_salida):
-                with pd.ExcelWriter(archivo_salida, engine='openpyxl', mode='a') as writer:
-                    df.to_excel(writer, sheet_name=nombre_hoja, index=False)
+                 with pd.ExcelWriter(archivo_salida, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                     df.to_excel(writer, sheet_name=nombre_hoja, index=False)
             else:
                 with pd.ExcelWriter(archivo_salida, engine='openpyxl') as writer:
                     df.to_excel(writer, sheet_name=nombre_hoja, index=False)
-                
-            print(f"✅ Resultados guardados en: {archivo_salida}")
             
+                print(f"✅ Resultados guardados en: {archivo_salida}")
+
         except Exception as e:
-            print(f"❌ Error al guardar resultados: {str(e)}")
+         print(f"❌ Error al guardar resultados: {str(e)}")

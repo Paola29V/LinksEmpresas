@@ -20,6 +20,8 @@ class AnalizadorEmpresas:
         self.chrome_options.add_argument('--disable-notifications')
         self.chrome_options.add_argument('--disable-popup-blocking')
         self.chrome_options.add_argument('--incognito')
+        self.chrome_options.add_argument("--headless")
+        
         
         self.driver = webdriver.Chrome(
             options=self.chrome_options
@@ -181,10 +183,10 @@ class AnalizadorEmpresas:
             
             # Determinar nombre del archivo de salida
             if archivo_salida is None:
-                fecha_actual = datetime.now().strftime('%Y%m%d')
+                fecha_hora_actual = datetime.now().strftime('%Y%m%d_%H%M%S')
                 archivo_salida = os.path.join(
                     self.carpeta_resultados, 
-                    f'resultados_combinados_{fecha_actual}.xlsx'
+                    f'resultados_combinados_{fecha_hora_actual}.xlsx'
                 )
             
             # Guardar resultados
@@ -201,15 +203,18 @@ class AnalizadorEmpresas:
 
     def _guardar_resultados(self, df_resultados, archivo_salida, nombre_hoja):
         """
-        Guarda los resultados en Excel.
-        """
+    Guarda los resultados en Excel.
+    """
         try:
             if os.path.exists(archivo_salida):
-                with pd.ExcelWriter(archivo_salida, engine='openpyxl', mode='a') as writer:
-                    df_resultados.to_excel(writer, sheet_name=nombre_hoja, index=False)
+            # Si el archivo existe, sobrescribir la hoja existente
+               with pd.ExcelWriter(archivo_salida, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                df_resultados.to_excel(writer, sheet_name=nombre_hoja, index=False)
             else:
-                with pd.ExcelWriter(archivo_salida, engine='openpyxl') as writer:
-                    df_resultados.to_excel(writer, sheet_name=nombre_hoja, index=False)
+            # Si el archivo no existe, crearlo
+              with pd.ExcelWriter(archivo_salida, engine='openpyxl') as writer:
+                df_resultados.to_excel(writer, sheet_name=nombre_hoja, index=False)
+            print(f"✅ Resultados guardados en: {archivo_salida}")
         except Exception as e:
-            print(f"❌ Error al guardar resultados: {str(e)}")
-            raise
+           print(f"❌ Error al guardar resultados: {str(e)}")
+        raise
